@@ -1,11 +1,6 @@
 module.exports = {
   root: true,
   extends: ['@blueking/eslint-config-bk/tsvue3', 'plugin:prettier/recommended'],
-  parserOptions: {
-    project: './tsconfig.eslint.json',
-    tsconfigRootDir: __dirname,
-    sourceType: 'module',
-  },
   rules: {
     'no-param-reassign': 0,
     'arrow-body-style': 'off',
@@ -15,5 +10,6 @@ module.exports = {
     'no-console': ['error', { allow: ['warn', 'error'] }],
     'no-debugger': 'error',
     'linebreak-style': 0,
+    'vue/multi-word-component-names': 0,
   },
 };
