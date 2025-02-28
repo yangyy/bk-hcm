@@ -35,6 +35,7 @@ import (
 	"hcm/pkg/adaptor/types/image"
 	"hcm/pkg/adaptor/types/instance-type"
 	typelb "hcm/pkg/adaptor/types/load-balancer"
+	networkinterface "hcm/pkg/adaptor/types/network-interface"
 	"hcm/pkg/adaptor/types/region"
 	"hcm/pkg/adaptor/types/route-table"
 	"hcm/pkg/adaptor/types/security-group"
