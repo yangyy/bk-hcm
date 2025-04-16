@@ -36,6 +36,7 @@ import (
 	"hcm/cmd/hc-service/service/bill"
 	"hcm/cmd/hc-service/service/capability"
 	"hcm/cmd/hc-service/service/cert"
+	"hcm/cmd/hc-service/service/cos"
 	"hcm/cmd/hc-service/service/cvm"
 	"hcm/cmd/hc-service/service/disk"
 	"hcm/cmd/hc-service/service/eip"

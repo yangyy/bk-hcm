@@ -20,10 +20,13 @@
 package tcloud
 
 import (
+	"fmt"
+	"net/http"
 	"time"
 
 	"hcm/pkg/adaptor/metric"
 	"hcm/pkg/adaptor/types"
+	typescos "hcm/pkg/adaptor/types/cos"
 	"hcm/pkg/criteria/constant"
 	"hcm/pkg/tools/rand"
 
@@ -37,6 +40,7 @@ import (
 	ssl "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/ssl/v20191205"
 	tag "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/tag/v20180813"
 	vpc "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/vpc/v20170312"
+	"github.com/tencentyun/cos-go-sdk-v5"
 )
 
 const (

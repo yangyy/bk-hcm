@@ -29,6 +29,7 @@ import (
 	typesBill "hcm/pkg/adaptor/types/bill"
 	"hcm/pkg/adaptor/types/cert"
 	"hcm/pkg/adaptor/types/core"
+	typescos "hcm/pkg/adaptor/types/cos"
 	"hcm/pkg/adaptor/types/cvm"
 	"hcm/pkg/adaptor/types/disk"
 	"hcm/pkg/adaptor/types/eip"
