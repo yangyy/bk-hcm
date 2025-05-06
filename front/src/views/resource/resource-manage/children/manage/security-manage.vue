@@ -54,6 +54,7 @@ import { useBusinessGlobalStore } from '@/store/business-global';
 import UsageBizValue from '@/views/resource/resource-manage/children/components/security/usage-biz-value.vue';
 import { showClone } from '../plugin/security-group/show-clone.plugin';
 import { checkVendorInResource } from '../plugin/security-group/check-vendor-in-resource.plugin';
+import { MENU_BUSINESS_SECURITY_GROUP } from '@/constants/menu-symbol';
 
 const { BK_HCM_AJAX_URL_PREFIX } = window.PROJECT_CONFIG;
 
@@ -991,12 +992,16 @@ watch(
     // 准备路由参数。这里使用明确的路由参数进行跳转，避免连续两次路由跳转时的参数错误
     const isResourcePage = whereAmI.value === Senarios.resource;
     const isBusinessPage = whereAmI.value === Senarios.business;
-    const path = isResourcePage ? '/resource/resource' : '/business/security';
+    const routeName = isResourcePage ? 'resourceManage' : MENU_BUSINESS_SECURITY_GROUP;
     const bizId = isBusinessPage ? getBizsId() : undefined;
     const accountId = isResourcePage && selectedAccountId.value ? selectedAccountId.value : undefined;
 
     // 更新路由
-    router.replace({ path, query: { [GLOBAL_BIZS_KEY]: bizId, type: 'security', scene: v, accountId } });
+    router.replace({
+      name: routeName,
+      params: { bizId },
+      query: { [GLOBAL_BIZS_KEY]: bizId, type: 'security', scene: v, accountId },
+    });
   },
   {
     immediate: true,

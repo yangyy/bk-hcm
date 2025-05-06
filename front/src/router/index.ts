@@ -5,51 +5,88 @@ import {
   createWebHashHistory,
   RouteLocationNormalized,
 } from 'vue-router';
-import { MENU_BUSINESS } from '@/constants/menu-symbol';
-import { businessViews } from '@/views';
-import common from './module/common';
-import workbench from './module/workbench';
-import resource from './module/resource';
-import resourceInside from './module/resource-inside';
-import service from './module/service';
-import serviceInside from './module/service-inside';
+import {
+  // MENU_BILL,
+  MENU_BUSINESS,
+  MENU_BUSINESS_HOST,
+  // MENU_RESOURCE,
+  // MENU_SCHEME,
+  MENU_SERVICE,
+} from '@/constants/menu-symbol';
+import { businessViews, serviceViews } from '@/views';
+// import resource from './module/resource';
+// import resourceInside from './module/resource-inside';
+// import service from './module/service';
+// import serviceInside from './module/service-inside';
 // import business from './module/business';
-import scheme from './module/scheme';
-import bill from './module/bill';
-import i18n from '@/language/i18n';
+// import scheme from './module/scheme';
+// import bill from './module/bill';
+// import i18n from '@/language/i18n';
 import { useCommonStore } from '@/store';
 import { useVerify } from '@/hooks';
 import { isArray, isRegExp, isString } from 'lodash';
 
-const { t } = i18n.global;
+// const { t } = i18n.global;
 
-const routes: RouteRecordRaw[] = [
-  ...common,
-  ...workbench,
-  ...resource,
-  ...resourceInside,
-  ...service,
-  ...serviceInside,
-  // ...business,
-  ...scheme,
-  ...bill,
+const statusRouters = [
   {
-    path: '/',
-    redirect: '/business/host',
-    meta: {
-      activeKey: 'businessHost',
-      breadcrumb: [t('计算'), t('主机')],
+    name: '404',
+    path: '/404',
+    component: () => import('@/views/status/404.vue'),
+  },
+  {
+    name: 'error',
+    path: '/error',
+    component: () => import('@/views/status/error.vue'),
+  },
+];
+
+const redirectRouters = [
+  {
+    path: '/:pathMatch(.*)*',
+    redirect: {
+      name: '404',
     },
   },
   {
-    path: '/403',
-    redirect: '/403',
+    path: '/',
+    redirect: {
+      name: MENU_BUSINESS,
+    },
   },
+];
+
+const routes: RouteRecordRaw[] = [
+  ...redirectRouters,
+  ...statusRouters,
   {
     name: MENU_BUSINESS,
-    path: '/business',
+    path: '/business/:bizId(\\d+)?',
+    redirect: {
+      name: MENU_BUSINESS_HOST,
+    },
     children: businessViews,
   },
+  {
+    name: MENU_SERVICE,
+    path: '/service',
+    children: serviceViews,
+  },
+  // {
+  //   name: MENU_BILL,
+  //   path: '/bill',
+  //   children: businessViews,
+  // },
+  // {
+  //   name: MENU_RESOURCE,
+  //   path: '/resource',
+  //   children: businessViews,
+  // },
+  // {
+  //   name: MENU_SCHEME,
+  //   path: '/resource',
+  //   children: businessViews,
+  // },
 ];
 
 const router = createRouter({

@@ -83,9 +83,8 @@ export default defineComponent({
       (newVal, oldVal) => {
         if (!oldVal && newVal) {
           // 如果是从全部账号下进入详情页, 此时点击账号id是没有 oldVal 的. 如果 newVal 对应的厂商在账号列表中没有展开, 那么将之展开即可.
-          const { vendorOfCurrentResource } = resourceStore;
-          if (props.checkIsExpand(vendorOfCurrentResource)) return;
-          props.handleExpand(vendorOfCurrentResource);
+          if (props.checkIsExpand(resourceStore.vendorOfCurrentResource)) return;
+          props.handleExpand(resourceStore.vendorOfCurrentResource);
         }
       },
     );

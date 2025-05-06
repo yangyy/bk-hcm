@@ -14,24 +14,24 @@ export const provideBreadcrumb = () => {
   watch(
     () => route.meta,
     (meta: RouteMetaConfig) => {
-      data.title = meta.title;
-      data.display = meta?.layout?.breadcrumbs?.show ?? meta.isShowBreadcrumb;
+      data.title = meta.menu?.i18n;
+      data.display = meta.layout?.breadcrumb?.show !== false;
     },
-    { deep: true },
+    { immediate: true, deep: true },
   );
 
   provide(breadcrumbSymbol, data);
 };
 
 export default function useBreadcrumb() {
-  const breadcrumb = inject<IBreadcrumb>(breadcrumbSymbol);
+  const data = inject<IBreadcrumb>(breadcrumbSymbol);
 
   const setTitle = (newTitle: string) => {
-    breadcrumb.title = newTitle;
+    data.title = newTitle;
   };
 
   return {
-    breadcrumb,
+    data,
     setTitle,
   };
 }

@@ -11,6 +11,7 @@ const resourceMenus: RouteRecordRaw[] = [
     children: [
       {
         path: 'resource',
+        name: 'resourceManage',
         component: () => import('@/views/resource/resource-manage/resource-manage.vue'),
         children: [
           {

@@ -70,7 +70,7 @@ onMounted(() => {
 
 <style scoped lang="scss">
 .header-release-note {
-  margin-right: 25px;
+  color: #96a2b9;
   font-size: 16px;
 
   &:hover {

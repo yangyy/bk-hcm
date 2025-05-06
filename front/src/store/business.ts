@@ -1,10 +1,8 @@
 import http from '@/http';
 import { defineStore } from 'pinia';
-
-import { useAccountStore } from '@/store';
-import { getQueryStringParams, localStorageActions } from '@/common/util';
 import { AsyncTaskDetailResp, ClbQuotasResp, LbPriceInquiryResp } from '@/typings';
-import { GLOBAL_BIZS_KEY, VendorEnum } from '@/common/constant';
+import { VendorEnum } from '@/common/constant';
+import { useWhereAmI } from '@/hooks/useWhereAmI';
 
 const { BK_HCM_AJAX_URL_PREFIX } = window.PROJECT_CONFIG;
 
@@ -14,21 +12,11 @@ export interface ICloneSecurityParams {
   manager: string;
   bak_manager: string;
 }
-// 获取
-const getBusinessApiPath = () => {
-  const store = useAccountStore();
-  if (location.href.includes('business')) {
-    return `bizs/${
-      store.bizs || getQueryStringParams(GLOBAL_BIZS_KEY) || localStorageActions.get(GLOBAL_BIZS_KEY, (value) => value)
-    }/`;
-  }
-  return '';
-};
 
-export const useBusinessStore = defineStore({
-  id: 'businessStore',
-  state: () => ({}),
-  actions: {
+export const useBusinessStore = defineStore('business', () => {
+  const { getBusinessApiPath } = useWhereAmI();
+
+  return {
     /**
      * @description: 获取资源列表 - 业务下
      * @param {any} data
@@ -585,5 +573,5 @@ export const useBusinessStore = defineStore({
     cvmOperate(type: string, data: { ids: string[] }) {
       return http.post(`${BK_HCM_AJAX_URL_PREFIX}/api/v1/cloud/${getBusinessApiPath()}cvms/batch/${type}`, data);
     },
-  },
+  };
 });

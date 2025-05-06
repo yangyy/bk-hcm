@@ -9,12 +9,12 @@ import './breadcrumb.scss';
 
 export default defineComponent({
   setup() {
-    const { breadcrumb } = useBreadcrumb();
+    const breadcrumb = useBreadcrumb();
     const route = useRoute();
 
     const currentTitle = computed(() => {
       const routeMeta = route.meta as RouteMetaConfig;
-      return breadcrumb.title ?? routeMeta.title ?? routeMeta?.menu?.i18n;
+      return breadcrumb.data.title ?? routeMeta?.menu?.i18n;
     });
 
     const defaultFrom = computed(() => {
@@ -51,7 +51,7 @@ export default defineComponent({
 
   render() {
     return (
-      this.breadcrumb.display && (
+      this.breadcrumb.data.display && (
         <div class='navigation-breadcrumb'>
           <div class='breadcrumb-content'>
             {this.from && (

@@ -1,7 +1,7 @@
 interface Menu {
   i18n?: string;
   parent?: any;
-  relative?: any;
+  relative?: string | symbol;
 }
 
 interface AuthView {
@@ -17,7 +17,7 @@ interface Auth {
 }
 
 interface Layout {
-  breadcrumbs?: {
+  breadcrumb?: {
     show?: boolean;
     back?: boolean;
   };
@@ -29,8 +29,7 @@ interface Extra {
 
 export interface RouteMetaConfig {
   available?: boolean;
-  owner?: string;
-  title?: string;
+  owner?: symbol | string;
   authKey?: string;
   view?: string;
   extra?: Extra;
@@ -38,8 +37,7 @@ export interface RouteMetaConfig {
   auth?: Auth;
   layout?: Layout;
   notMenu?: boolean;
-  activeKey?: string;
-  isShowBreadcrumb?: boolean;
+  activeKey?: symbol | string;
   icon?: string;
 }
 
@@ -47,8 +45,6 @@ export default class Meta {
   available = true;
 
   owner = '';
-
-  title = '';
 
   authKey = 'view';
 
@@ -67,9 +63,6 @@ export default class Meta {
       const typedKey = key as keyof RouteMetaConfig;
       Reflect.set(this, typedKey, data[typedKey]);
     });
-
-    this.menu.i18n = this.title;
-    this.menu.relative = data.activeKey;
 
     this.menu = Object.assign(this.menu, data.menu);
 

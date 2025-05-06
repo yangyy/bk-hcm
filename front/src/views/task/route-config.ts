@@ -9,16 +9,15 @@ export default [
     component: () => import('./index.vue'),
     meta: {
       ...new Meta({
-        title: '任务管理',
         activeKey: MENU_BUSINESS_TASK_MANAGEMENT,
         // 没有业务访问权限不会展示侧边栏导航，这里只是做一个权限优化的占位提示
         auth: {
           view: { type: 'biz_access' },
         },
         menu: {
+          i18n: '任务管理',
           relative: MENU_BUSINESS_TASK_MANAGEMENT,
         },
-        icon: 'hcm-icon bkhcm-icon-bushu',
       }),
     },
   },
@@ -28,11 +27,9 @@ export default [
     component: () => import('./details/index.vue'),
     meta: {
       ...new Meta({
-        title: '任务详情',
-        notMenu: true,
         activeKey: MENU_BUSINESS_TASK_MANAGEMENT,
-        isShowBreadcrumb: true,
         menu: {
+          i18n: '任务详情',
           relative: MENU_BUSINESS_TASK_MANAGEMENT,
         },
       }),

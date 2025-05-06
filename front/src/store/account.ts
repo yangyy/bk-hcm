@@ -11,7 +11,7 @@ export const useAccountStore = defineStore({
   state: () => ({
     fetching: false,
     list: shallowRef([]),
-    bizs: 0 as number,
+    bizs: 213,
     accountList: shallowRef([]),
     accountCached: new Map<string, any>(),
   }),
