@@ -33,6 +33,8 @@ export interface IProp {
       getMenuList?: GetMenuListFunc;
       [key: string]: any;
     };
+    conditionFormatterMapper?: Record<string, (...args: any) => RulesItem>;
+    valueFormatterMapper?: Record<string, (value: any) => any>;
   };
   // table 配置项
   tableOptions: {
@@ -85,6 +87,8 @@ export interface IProp {
 export const useTable = (props: IProp) => {
   defaults(props, { requestOption: {} });
   defaults(props.requestOption, { dataPath: 'data.details', immediate: true });
+
+  const { conditionFormatterMapper, valueFormatterMapper } = props.searchOptions || {};
 
   const { whereAmI } = useWhereAmI();
 
@@ -213,8 +217,7 @@ export const useTable = (props: IProp) => {
           class={{
             [cssModule['remote-table-container']]: true,
             [cssModule['no-search']]: props.searchOptions?.disabled,
-          }}
-        >
+          }}>
           {hasTopBar.value && (
             <section class={cssModule['top-bar']}>
               {slots.operation && <div class={cssModule['operate-btn-groups']}>{slots.operation?.()}</div>}
@@ -236,8 +239,7 @@ export const useTable = (props: IProp) => {
             loading={isLoading.value}
             opacity={1}
             class={cssModule['loading-wrapper']}
-            style={{ height: getTableHeight() }}
-          >
+            style={{ height: getTableHeight() }}>
             <Table
               ref={tableRef}
               data={dataList.value}
@@ -250,8 +252,7 @@ export const useTable = (props: IProp) => {
               onPageLimitChange={handlePageLimitChange}
               onPageValueChange={handlePageValueChange}
               onColumnSort={handleSort}
-              onColumnFilter={() => {}}
-            >
+              onColumnFilter={() => {}}>
               {{
                 expandRow: (row: any) => slots.expandRow?.(row),
                 empty: () => {
@@ -272,6 +273,18 @@ export const useTable = (props: IProp) => {
    */
   const resolveRule = (rule: RulesItem): RulesItem => {
     const { field, op, value } = rule;
+
+    const conditionFormatter = conditionFormatterMapper?.[rule.field];
+    if (conditionFormatter) {
+      return conditionFormatter(rule.value);
+    }
+
+    // TODO: 后续可以将switch中的逻辑替换为调用方传入 valueFormatterMapper，降低耦合
+    const valueFormatter = valueFormatterMapper?.[rule.field];
+    if (valueFormatter) {
+      return { field, op, value: valueFormatter(value) };
+    }
+
     switch (field) {
       case 'vendor':
         return { field, op, value: VendorReverseMap[value as string] || value };

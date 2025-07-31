@@ -37,6 +37,7 @@ func AdaptAuthOptions(a *meta.ResourceAttribute) (iam.ActionID, []iam.Resource, 
 		return genSkipResource(a)
 	}
 
+<<<<<<< HEAD
 	switch a.Basic.Type {
 	case meta.Biz:
 		return genBizResource(a)
@@ -117,8 +118,57 @@ func AdaptAuthOptions(a *meta.ResourceAttribute) (iam.ActionID, []iam.Resource, 
 	case meta.CosBucket:
 		return genCosBucket(a)
 	default:
+=======
+	genFunc, ok := genResourceFuncMap[a.Basic.Type]
+	if !ok {
+>>>>>>> origin/v1.8.x
 		return "", nil, errf.Newf(errf.InvalidParameter, "unsupported hcm auth type: %s", a.Basic.Type)
 	}
+	return genFunc(a)
+}
+
+type genResourceFunc func(*meta.ResourceAttribute) (client.ActionID, []client.Resource, error)
+
+var genResourceFuncMap = map[meta.ResourceType]genResourceFunc{
+	meta.Biz:                      genBizResource,
+	meta.Account:                  genAccountResource,
+	meta.SubAccount:               genSubAccountResource,
+	meta.Vpc:                      genVpcResource,
+	meta.Subnet:                   genSubnetResource,
+	meta.Disk:                     genDiskResource,
+	meta.SecurityGroup:            genSecurityGroupResource,
+	meta.SecurityGroupRule:        genSecurityGroupRuleResource,
+	meta.GcpFirewallRule:          genGcpFirewallRuleResource,
+	meta.RouteTable:               genRouteTableResource,
+	meta.Route:                    genRouteResource,
+	meta.RecycleBin:               genRecycleBinResource,
+	meta.Audit:                    genAuditResource,
+	meta.Cvm:                      genCvmResource,
+	meta.NetworkInterface:         genNetworkInterfaceResource,
+	meta.Eip:                      genEipResource,
+	meta.CloudResource:            genCloudResResource,
+	meta.Quota:                    genProxyResourceFind,
+	meta.InstanceType:             genProxyResourceFind,
+	meta.CostManage:               genCostManageResource,
+	meta.BizCollection:            genBizCollectionResource,
+	meta.CloudSelectionScheme:     genCloudSelectionSchemeResource,
+	meta.CloudSelectionIdc:        genCloudSelectionResource,
+	meta.CloudSelectionBizType:    genCloudSelectionResource,
+	meta.CloudSelectionDataSource: genCloudSelectionResource,
+	meta.ArgumentTemplate:         genArgumentTemplateResource,
+	meta.Cert:                     genCertResource,
+	meta.LoadBalancer:             genLoadBalancerResource,
+	meta.Listener:                 genListenerResource,
+	meta.TargetGroup:              genTargetGroupResource,
+	meta.UrlRuleAuditResType:      genUrlRuleResource,
+	meta.MainAccount:              genMainAccountRuleResource,
+	meta.RootAccount:              genRootAccountRuleResource,
+	meta.AccountBill:              genAccountBillResource,
+	meta.Application:              genApplicationResources,
+	meta.AccountBillThirdParty:    genAccountBillThirdPartyResource,
+	meta.Image:                    genImageResource,
+	meta.TaskManagement:           genTaskManagementResource,
+	meta.CosBucket:                genCosBucket,
 }
 
 func genApplicationResources(a *meta.ResourceAttribute) (iam.ActionID, []iam.Resource, error) {
