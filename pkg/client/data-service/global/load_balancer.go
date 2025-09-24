@@ -24,6 +24,7 @@ import (
 	dataservice "hcm/pkg/api/data-service"
 	dataproto "hcm/pkg/api/data-service/cloud"
 	"hcm/pkg/client/common"
+	typeslb "hcm/pkg/dal/dao/types/load-balancer"
 	"hcm/pkg/kit"
 	"hcm/pkg/rest"
 )

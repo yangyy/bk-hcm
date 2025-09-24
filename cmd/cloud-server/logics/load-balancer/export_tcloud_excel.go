@@ -23,11 +23,8 @@ import (
 	"fmt"
 	"strings"
 
-	"hcm/pkg/api/core"
 	loadbalancer "hcm/pkg/api/core/cloud/load-balancer"
-	"hcm/pkg/api/data-service/cloud"
 	"hcm/pkg/criteria/enumor"
-	"hcm/pkg/dal/dao/tools"
 	"hcm/pkg/kit"
 	"hcm/pkg/logs"
 	"hcm/pkg/tools/converter"
@@ -205,9 +202,9 @@ func (l *listenerExporter) writeTCloudLayer4Listener(kt *kit.Kit, zipOperator zi
 
 		layer4Rule, ok := lblIDLayer4RuleMap[listener.ID]
 		if !ok {
-			logs.Errorf("can not get layer4 rule by listener id, vendor: %s, listener id: %s, rid: %s", l.vendor,
+			logs.Errorf("can not get layer4 rule by listener id, vendor: %s, listener id: %s, rid: %s", vendor,
 				listener.ID, kt.Rid)
-			return fmt.Errorf("can not get layer4 rule by listener id, vendor: %s, listener id: %s", l.vendor,
+			return fmt.Errorf("can not get layer4 rule by listener id, vendor: %s, listener id: %s", vendor,
 				listener.ID)
 		}
 
@@ -234,7 +231,7 @@ func (l *listenerExporter) writeTCloudLayer4Listener(kt *kit.Kit, zipOperator zi
 		})
 	}
 
-	if err := l.writeLayer4Listeners(kt, zipOperator, clbListenerMap); err != nil {
+	if err := writeLayer4Listeners(kt, vendor, zipOperator, clbListenerMap); err != nil {
 		return err
 	}
 
@@ -381,14 +378,14 @@ func (l *listenerExporter) writeTCloudLayer7Listener(kt *kit.Kit, zipOperator zi
 		})
 	}
 
-	if err := l.writeLayer7Listeners(kt, zipOperator, clbListenerMap); err != nil {
+	if err := writeLayer7Listeners(kt, vendor, zipOperator, clbListenerMap); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (l *listenerExporter) writeTCloudRule(kt *kit.Kit, zipOperator zip.OperatorI,
+func writeTCloudRule(kt *kit.Kit, vendor enumor.Vendor, zipOperator zip.OperatorI,
 	lbMap map[string]loadbalancer.BaseLoadBalancer, layer7ListenerMap map[string]loadbalancer.TCloudListener,
 	layer7RuleMap map[string]loadbalancer.TCloudLbUrlRule) error {
 
@@ -441,23 +438,23 @@ func (l *listenerExporter) writeTCloudRule(kt *kit.Kit, zipOperator zip.Operator
 		})
 	}
 
-	if err := l.writeRules(kt, zipOperator, clbRuleMap); err != nil {
+	if err := writeRules(kt, vendor, zipOperator, clbRuleMap); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (l *listenerExporter) writeTCloudLayer4Rs(kt *kit.Kit, zipOperator zip.OperatorI,
-	lbMap map[string]loadbalancer.BaseLoadBalancer, layer4ListenerMap map[string]loadbalancer.TCloudListener,
-	layer4TgLblRel []loadbalancer.BaseTargetListenerRuleRel, layer4Rs []loadbalancer.BaseTarget) error {
+func writeTCloudLayer4Rs(kt *kit.Kit, vendor enumor.Vendor, zipOperator zip.OperatorI,
+	lbMap map[string]loadbalancer.BaseLoadBalancer, listenerMap map[string]loadbalancer.TCloudListener,
+	tgLblRel []loadbalancer.BaseTargetListenerRuleRel, layer4Rs []loadbalancer.BaseTarget) error {
 
 	if len(layer4Rs) == 0 {
 		return nil
 	}
 
 	tgIDLblIDMap := make(map[string]string)
-	for _, tgLblRel := range layer4TgLblRel {
+	for _, tgLblRel := range tgLblRel {
 		tgIDLblIDMap[tgLblRel.TargetGroupID] = tgLblRel.LblID
 	}
 
@@ -469,7 +466,7 @@ func (l *listenerExporter) writeTCloudLayer4Rs(kt *kit.Kit, zipOperator zip.Oper
 			logs.Errorf("can not get lbl by tg id, tg id: %s, rid: %s", tgID, kt.Rid)
 			return fmt.Errorf("can not get lbl by tg id, tg id: %s", tgID)
 		}
-		listener, ok := layer4ListenerMap[lblID]
+		listener, ok := listenerMap[lblID]
 		if !ok {
 			logs.Errorf("can not get listener by lbl id, lbl id: %s, rid: %s", lblID, kt.Rid)
 			return fmt.Errorf("can not get listener by lbl id, lbl id: %s", lblID)
@@ -500,16 +497,16 @@ func (l *listenerExporter) writeTCloudLayer4Rs(kt *kit.Kit, zipOperator zip.Oper
 		})
 	}
 
-	if err := l.writeLayer4Rs(kt, zipOperator, clbRsMap); err != nil {
+	if err := writeLayer4Rs(kt, vendor, zipOperator, clbRsMap); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (l *listenerExporter) writeTCloudLayer7Rs(kt *kit.Kit, zipOperator zip.OperatorI,
-	lbMap map[string]loadbalancer.BaseLoadBalancer, layer7ListenerMap map[string]loadbalancer.TCloudListener,
-	layer7RuleMap map[string]loadbalancer.TCloudLbUrlRule, layer7TgLblRel []loadbalancer.BaseTargetListenerRuleRel,
+func writeTCloudLayer7Rs(kt *kit.Kit, vendor enumor.Vendor, zipOperator zip.OperatorI,
+	lbMap map[string]loadbalancer.BaseLoadBalancer, listenerMap map[string]loadbalancer.TCloudListener,
+	ruleMap map[string]loadbalancer.TCloudLbUrlRule, tgLblRel []loadbalancer.BaseTargetListenerRuleRel,
 	layer7Rs []loadbalancer.BaseTarget) error {
 
 	if len(layer7Rs) == 0 {
@@ -518,7 +515,7 @@ func (l *listenerExporter) writeTCloudLayer7Rs(kt *kit.Kit, zipOperator zip.Oper
 
 	tgIDLblIDMap := make(map[string]string)
 	tgIDRuleIDMap := make(map[string]string)
-	for _, tgLblRel := range layer7TgLblRel {
+	for _, tgLblRel := range tgLblRel {
 		tgIDLblIDMap[tgLblRel.TargetGroupID] = tgLblRel.LblID
 		tgIDRuleIDMap[tgLblRel.TargetGroupID] = tgLblRel.ListenerRuleID
 	}
@@ -531,7 +528,7 @@ func (l *listenerExporter) writeTCloudLayer7Rs(kt *kit.Kit, zipOperator zip.Oper
 			logs.Errorf("can not get lbl by tg id, tg id: %s, rid: %s", tgID, kt.Rid)
 			return fmt.Errorf("can not get lbl by tg id, tg id: %s", tgID)
 		}
-		listener, ok := layer7ListenerMap[lblID]
+		listener, ok := listenerMap[lblID]
 		if !ok {
 			logs.Errorf("can not get listener by lbl id, lbl id: %s, rid: %s", lblID, kt.Rid)
 			return fmt.Errorf("can not get listener by lbl id, lbl id: %s", lblID)
@@ -547,7 +544,7 @@ func (l *listenerExporter) writeTCloudLayer7Rs(kt *kit.Kit, zipOperator zip.Oper
 			logs.Errorf("can not get rule id by tg id, tg id: %s, rid: %s", tgID, kt.Rid)
 			return fmt.Errorf("can not get rule id by tg id, tg id: %s", tgID)
 		}
-		rule, ok := layer7RuleMap[ruleID]
+		rule, ok := ruleMap[ruleID]
 		if !ok {
 			logs.Errorf("can not get rule by rule id, rule id: %s, rid: %s", ruleID, kt.Rid)
 			return fmt.Errorf("can not get rule by rule id, rule id: %s", ruleID)
@@ -574,7 +571,7 @@ func (l *listenerExporter) writeTCloudLayer7Rs(kt *kit.Kit, zipOperator zip.Oper
 		})
 	}
 
-	if err := l.writeLayer7Rs(kt, zipOperator, clbRsMap); err != nil {
+	if err := writeLayer7Rs(kt, vendor, zipOperator, clbRsMap); err != nil {
 		return err
 	}
 
