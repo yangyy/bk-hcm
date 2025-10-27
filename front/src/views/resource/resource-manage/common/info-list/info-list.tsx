@@ -46,6 +46,7 @@ export default defineComponent({
     const editCompRefs = ref(new Map<string, any>());
     // 如果祖辈组件有 provide 预鉴权参数, 则需要对编辑操作进行预鉴权处理
     const handleEdit = (name: string) => {
+      if (!name) return;
       if (isAuth.value === false) {
         // 无权限, 展示权限申请弹窗
         const { authId, handleAuth } = authAction;
@@ -89,8 +90,7 @@ export default defineComponent({
         fromKey={field.prop}
         hideEdit={true}
         trim={field.trim}
-        onChange={this.handleBlur}
-      ></RenderDetailEdit>
+        onChange={this.handleBlur}></RenderDetailEdit>
     );
 
     // 渲染链接
@@ -196,8 +196,7 @@ export default defineComponent({
               )}
               <div
                 class={['item-value', typeof cls === 'function' ? cls(value) : cls]}
-                style={{ [showOverflowTips ? 'maxWidth' : 'width']: valueMaxWidth }}
-              >
+                style={{ [showOverflowTips ? 'maxWidth' : 'width']: valueMaxWidth }}>
                 {showOverflowTips ? (
                   <OverflowTitle class='full-width' type='tips' content={renderField(field)}>
                     {renderField(field)}

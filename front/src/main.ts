@@ -24,6 +24,8 @@ import bkui from 'bkui-vue';
 // 全量引入 bkui-vue 样式
 import 'bkui-vue/dist/style.css';
 
+import '@blueking/tdesign-ui/vue3/index.css';
+
 const app = createApp(App);
 
 const pinia = createPinia();

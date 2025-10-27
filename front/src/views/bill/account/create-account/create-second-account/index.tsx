@@ -15,6 +15,7 @@ import { useRoute, useRouter } from 'vue-router';
 import BusinessSelector from '@/components/business-selector/index.vue';
 import { PluginHandlerMailbox } from '@/plugin-handler/create-account-mail-suffix';
 import EmailInput from './create-section-email';
+import { MENU_SERVICE_TICKET_DETAILS } from '@/constants/menu-symbol';
 const { FormItem } = Form;
 export default defineComponent({
   setup() {
@@ -28,7 +29,7 @@ export default defineComponent({
     const formInstance = ref();
     const { formModel } = useFormModel({
       name: '', // 名字
-      vendor: VendorEnum.AZURE, // 云厂商
+      vendor: VendorEnum.GCP, // 云厂商
       email: '', // 邮箱
       managers: [], // 负责人数组
       bak_managers: [], // 备份负责人数组
@@ -101,7 +102,7 @@ export default defineComponent({
           theme: 'success',
         });
         router.push({
-          path: '/service/my-apply/detail',
+          name: MENU_SERVICE_TICKET_DETAILS,
           query: {
             ...route.query,
             id: data.id,
@@ -146,13 +147,12 @@ export default defineComponent({
                       <FormItem label='云厂商' required property='vendor'>
                         <div class={'account-vendor-selector'}>
                           {MAIN_ACCOUNT_VENDORS.map(({ vendor, name, icon }) =>
-                            vendor !== VendorEnum.TCLOUD ? (
+                            [VendorEnum.GCP, VendorEnum.HUAWEI, VendorEnum.AWS].includes(vendor) ? (
                               <div
                                 class={`account-vendor-option ${
                                   vendor === formModel.vendor ? 'account-vendor-option-active' : ''
                                 }`}
-                                onClick={() => handleVendorChange(vendor)}
-                              >
+                                onClick={() => handleVendorChange(vendor)}>
                                 <img src={icon} alt={name} class={'account-vendor-option-icon'} />
                                 <p class={'account-vendor-option-text'}>{name}</p>
                                 {formModel.vendor === vendor ? <Success fill='#3A84FF' class={'active-icon'} /> : null}
@@ -161,16 +161,8 @@ export default defineComponent({
                               <div
                                 class={`account-vendor-option disabled-option`}
                                 v-bk-tooltips={{
-                                  content: (
-                                    <span>
-                                      腾讯云账号需要到云梯申请，请参考{' '}
-                                      <Button text theme='primary'>
-                                        腾讯云账号申请指引
-                                      </Button>
-                                    </span>
-                                  ),
-                                }}
-                              >
+                                  content: '该云厂商的账号创建暂不支持',
+                                }}>
                                 <img src={icon} alt={name} class={'account-vendor-option-icon'} />
                                 <p>{name}</p>
                               </div>
@@ -188,8 +180,7 @@ export default defineComponent({
                               ),
                               content: '当前微软云、谷歌云、华为云的站点类型默认限制为“国际站”，“中国站”不可选 ',
                             }}
-                            disabled={[VendorEnum.AZURE, VendorEnum.GCP, VendorEnum.HUAWEI].includes(formModel.vendor)}
-                          >
+                            disabled={[VendorEnum.AZURE, VendorEnum.GCP, VendorEnum.HUAWEI].includes(formModel.vendor)}>
                             中国站
                           </BkRadioButton>
                           <BkRadioButton label='international'>国际站</BkRadioButton>

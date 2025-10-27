@@ -640,8 +640,61 @@ func genBizLoadBalancerResource(a *meta.ResourceAttribute) (iam.ActionID, []iam.
 }
 
 // genListenerResource generate clb listener related iam resource.
+<<<<<<< HEAD
 func genListenerResource(a *meta.ResourceAttribute) (iam.ActionID, []iam.Resource, error) {
 	return genLoadBalancerRelatedResources(a)
+=======
+func genListenerResource(a *meta.ResourceAttribute) (client.ActionID, []client.Resource, error) {
+	return genLoadBalancerRelatedResources(a)
+}
+
+// genLoadBalancerRelatedResources 生成负载均衡下属资源的权限点
+func genLoadBalancerRelatedResources(a *meta.ResourceAttribute) (client.ActionID, []client.Resource, error) {
+	res := client.Resource{
+		System: sys.SystemIDHCM,
+		Type:   sys.Account,
+	}
+
+	// compatible for authorize any
+	if len(a.ResourceID) > 0 {
+		res.ID = a.ResourceID
+	}
+
+	if a.BizID > 0 {
+		return genBizLoadBalancerRelatedResources(a)
+	}
+	switch a.Basic.Action {
+	case meta.Find:
+		return genCloudResResource(a)
+	case meta.Create, meta.Update, meta.Delete:
+		// update resource is related to hcm account resource
+		return sys.CLBResOperate, []client.Resource{res}, nil
+	default:
+		return "", nil, errf.Newf(errf.InvalidParameter, "unsupported hcm action: %s", a.Basic.Action)
+	}
+}
+
+// genBizLoadBalancerRelatedResources 生成业务下负载均衡下属资源的权限点
+func genBizLoadBalancerRelatedResources(a *meta.ResourceAttribute) (client.ActionID, []client.Resource, error) {
+	res := client.Resource{
+		System: sys.SystemIDCMDB,
+		Type:   sys.Biz,
+	}
+
+	// compatible for authorize any
+	if a.BizID > 0 {
+		res.ID = strconv.FormatInt(a.BizID, 10)
+	}
+
+	switch a.Basic.Action {
+	case meta.Find:
+		return sys.BizAccess, []client.Resource{res}, nil
+	case meta.Create, meta.Update, meta.Delete:
+		return sys.BizCLBResOperate, []client.Resource{res}, nil
+	default:
+		return "", nil, errf.Newf(errf.InvalidParameter, "unsupported hcm action: %s", a.Basic.Action)
+	}
+>>>>>>> origin/master
 }
 
 // genLoadBalancerRelatedResources 生成负载均衡下属资源的权限点
@@ -713,7 +766,11 @@ func genTargetGroupResource(a *meta.ResourceAttribute) (iam.ActionID, []iam.Reso
 	switch a.Basic.Action {
 	case meta.Associate, meta.Disassociate:
 		if a.BizID > 0 {
+<<<<<<< HEAD
 			return sys.BizCLBResOperate, []iam.Resource{bizRes}, nil
+=======
+			return sys.BizCLBResOperate, []client.Resource{bizRes}, nil
+>>>>>>> origin/master
 		}
 		return sys.IaaSResOperate, []iam.Resource{res}, nil
 	default:
@@ -722,7 +779,11 @@ func genTargetGroupResource(a *meta.ResourceAttribute) (iam.ActionID, []iam.Reso
 }
 
 // genUrlRuleResource generate clb listener related iam resource.
+<<<<<<< HEAD
 func genUrlRuleResource(a *meta.ResourceAttribute) (iam.ActionID, []iam.Resource, error) {
+=======
+func genUrlRuleResource(a *meta.ResourceAttribute) (client.ActionID, []client.Resource, error) {
+>>>>>>> origin/master
 	return genLoadBalancerRelatedResources(a)
 }
 
@@ -845,4 +906,17 @@ func genCosBucket(a *meta.ResourceAttribute) (iam.ActionID, []iam.Resource, erro
 
 func genCloudSelectionResource(*meta.ResourceAttribute) (iam.ActionID, []iam.Resource, error) {
 	return sys.CloudSelectionRecommend, make([]iam.Resource, 0), nil
+}
+
+func genGlobalConfigResource(a *meta.ResourceAttribute) (client.ActionID, []client.Resource, error) {
+	switch a.Basic.Action {
+	case meta.Create:
+		return sys.GlobalConfiguration, make([]client.Resource, 0), nil
+	case meta.Update:
+		return sys.GlobalConfiguration, make([]client.Resource, 0), nil
+	case meta.Delete:
+		return sys.GlobalConfiguration, make([]client.Resource, 0), nil
+	default:
+		return "", nil, errf.Newf(errf.InvalidParameter, "unsupported hcm action: %s", a.Basic.Action)
+	}
 }

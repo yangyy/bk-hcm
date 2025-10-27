@@ -21,6 +21,7 @@ package lblogic
 
 import (
 	"fmt"
+<<<<<<< HEAD
 	"path/filepath"
 
 	cslb "hcm/pkg/api/cloud-server/load-balancer"
@@ -37,6 +38,14 @@ import (
 	"hcm/pkg/runtime/filter"
 	"hcm/pkg/table"
 	"hcm/pkg/tools/maps"
+=======
+
+	"hcm/pkg/criteria/constant"
+	"hcm/pkg/criteria/enumor"
+	"hcm/pkg/kit"
+	"hcm/pkg/logs"
+	"hcm/pkg/table"
+>>>>>>> origin/master
 	"hcm/pkg/tools/slice"
 	"hcm/pkg/zip"
 	"hcm/pkg/zip/excel"
@@ -48,6 +57,7 @@ type Exporter interface {
 	Export(kt *kit.Kit) (string, error)
 }
 
+<<<<<<< HEAD
 // listenerExporter ...
 type listenerExporter struct {
 	client *client.ClientSet
@@ -533,6 +543,8 @@ func (l *listenerExporter) writeLayer7Rs(kt *kit.Kit, zipOperator zip.OperatorI,
 		constant.Layer7RsSheetName)
 }
 
+=======
+>>>>>>> origin/master
 func write[T table.Table](kt *kit.Kit, vendor enumor.Vendor, zipOperator zip.OperatorI, infos map[string][]T,
 	headers [][]string, filePrefix string, sheetName string) error {
 
@@ -567,3 +579,41 @@ func write[T table.Table](kt *kit.Kit, vendor enumor.Vendor, zipOperator zip.Ope
 	}
 	return nil
 }
+<<<<<<< HEAD
+=======
+
+func writeLayer4Listeners(kt *kit.Kit, vendor enumor.Vendor, zipOperator zip.OperatorI,
+	clbListenerMap map[string][]Layer4ListenerDetail) error {
+
+	return write[Layer4ListenerDetail](kt, vendor, zipOperator, clbListenerMap, layer4ListenerHeaders,
+		constant.Layer4ListenerFilePrefix, constant.Layer4ListenerSheetName)
+}
+
+func writeLayer7Listeners(kt *kit.Kit, vendor enumor.Vendor, zipOperator zip.OperatorI,
+	clbListenerMap map[string][]Layer7ListenerDetail) error {
+
+	return write[Layer7ListenerDetail](kt, vendor, zipOperator, clbListenerMap, layer7ListenerHeaders,
+		constant.Layer7ListenerFilePrefix, constant.Layer7ListenerSheetName)
+}
+
+func writeRules(kt *kit.Kit, vendor enumor.Vendor, zipOperator zip.OperatorI,
+	clbRuleMap map[string][]RuleDetail) error {
+
+	return write[RuleDetail](kt, vendor, zipOperator, clbRuleMap, ruleHeaders, constant.RuleFilePrefix,
+		constant.RuleSheetName)
+}
+
+func writeLayer4Rs(kt *kit.Kit, vendor enumor.Vendor, zipOperator zip.OperatorI,
+	clbRsMap map[string][]Layer4RsDetail) error {
+
+	return write[Layer4RsDetail](kt, vendor, zipOperator, clbRsMap, layer4RsHeaders, constant.Layer4RsFilePrefix,
+		constant.Layer4RsSheetName)
+}
+
+func writeLayer7Rs(kt *kit.Kit, vendor enumor.Vendor, zipOperator zip.OperatorI,
+	clbRsMap map[string][]Layer7RsDetail) error {
+
+	return write[Layer7RsDetail](kt, vendor, zipOperator, clbRsMap, layer7RsHeaders, constant.Layer7RsFilePrefix,
+		constant.Layer7RsSheetName)
+}
+>>>>>>> origin/master
