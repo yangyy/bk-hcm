@@ -975,7 +975,7 @@ func (req *TCloudRuleBindTargetGroup) Validate() error {
 
 // ExportTargetReq 导出业务下RS
 type ExportTargetReq struct {
-	TargetIDs []string `json:"target_ids" validate:"min=1,max=5000"`
+	TargetIDs []string `json:"target_ids" validate:"min=1,max=10000"`
 }
 
 // Validate ...
@@ -1112,6 +1112,9 @@ type LbTopoReq struct {
 // Validate ...
 func (l *LbTopoReq) Validate() error {
 	if err := validator.Validate.Struct(l); err != nil {
+		return err
+	}
+	if err := validator.Validate.Struct(l.LbTopoCond); err != nil {
 		return err
 	}
 	return nil
