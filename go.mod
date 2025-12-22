@@ -1,6 +1,8 @@
 module hcm
 
-go 1.21
+go 1.24.0
+
+toolchain go1.24.9
 
 require (
 	cloud.google.com/go/asset v1.19.0
@@ -17,11 +19,11 @@ require (
 	github.com/TencentBlueKing/gopkg v1.1.0
 	github.com/aws/aws-sdk-go v1.44.334
 	github.com/emicklei/go-restful/v3 v3.10.2
-	github.com/go-playground/validator/v10 v10.11.2
+	github.com/go-playground/validator/v10 v10.20.0
 	// go-sql-driver/mysql v1.8.1 may casuse error: connection.go:49: unexpected EOF
 	github.com/go-sql-driver/mysql v1.7.1
 	github.com/gogo/protobuf v1.3.2
-	github.com/golang-jwt/jwt/v4 v4.5.0
+	github.com/golang-jwt/jwt/v4 v4.5.2
 	github.com/golang/protobuf v1.5.4
 	github.com/huaweicloud/huaweicloud-sdk-go-v3 v0.1.40
 	github.com/jmoiron/sqlx v1.3.5
@@ -57,8 +59,7 @@ require (
 require (
 	cloud.google.com/go v0.112.2 // indirect
 	cloud.google.com/go/accesscontextmanager v1.8.6 // indirect
-	cloud.google.com/go/compute v1.24.0 // indirect
-	cloud.google.com/go/compute/metadata v0.2.3 // indirect
+	cloud.google.com/go/compute/metadata v0.3.0 // indirect
 	cloud.google.com/go/longrunning v0.5.6 // indirect
 	cloud.google.com/go/orgpolicy v1.12.2 // indirect
 	cloud.google.com/go/osconfig v1.12.6 // indirect
@@ -97,6 +98,7 @@ require github.com/patrickmn/go-cache v2.1.0+incompatible
 
 require (
 	github.com/Azure/azure-sdk-for-go/sdk/internal v1.5.2 // indirect
+	github.com/gabriel-vasile/mimetype v1.4.3 // indirect
 	github.com/mitchellh/mapstructure v1.4.3 // indirect
 	github.com/mohae/deepcopy v0.0.0-20170929034955-c48cc78d4826 // indirect
 	github.com/mozillazg/go-httpheader v0.2.1 // indirect
@@ -104,6 +106,7 @@ require (
 	github.com/richardlehane/msoleps v1.0.3 // indirect
 	github.com/xuri/efp v0.0.0-20231025114914-d1ff6096ae53 // indirect
 	github.com/xuri/nfp v0.0.0-20230919160717-d98342af3f05 // indirect
+	golang.org/x/telemetry v0.0.0-20251008203120-078029d740a8 // indirect
 )
 
 require (
@@ -125,7 +128,7 @@ require (
 	github.com/klauspost/compress v1.16.7 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.7 // indirect
 	github.com/kylelemons/godebug v1.1.0 // indirect
-	github.com/leodido/go-urn v1.2.4 // indirect
+	github.com/leodido/go-urn v1.4.0 // indirect
 	github.com/matttproud/golang_protobuf_extensions v1.0.4 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
@@ -142,16 +145,15 @@ require (
 	go.opencensus.io v0.24.0 // indirect
 	go.uber.org/multierr v1.9.0 // indirect
 	go.uber.org/zap v1.24.0 // indirect
-	golang.org/x/crypto v0.21.0 // indirect; indirectd
-	golang.org/x/mod v0.13.0 // indirect
-	golang.org/x/net v0.22.0 // indirect
-	golang.org/x/oauth2 v0.18.0 // indirect
-	golang.org/x/sync v0.6.0
-	golang.org/x/sys v0.18.0 // indirect
-	golang.org/x/text v0.14.0 // indirect
-	golang.org/x/tools v0.14.0 // indirect
+	golang.org/x/crypto v0.45.0 // indirect; indirectd
+	golang.org/x/mod v0.29.0 // indirect
+	golang.org/x/net v0.47.0 // indirect
+	golang.org/x/oauth2 v0.27.0 // indirect
+	golang.org/x/sync v0.18.0
+	golang.org/x/sys v0.38.0 // indirect
+	golang.org/x/text v0.31.0 // indirect
+	golang.org/x/tools v0.38.0 // indirect
 	golang.org/x/xerrors v0.0.0-20231012003039-104605ab7028 // indirect
-	google.golang.org/appengine v1.6.8 // indirect
 	google.golang.org/genproto v0.0.0-20240227224415-6ceb2ff114de // indirect
 	google.golang.org/grpc v1.63.2
 	google.golang.org/protobuf v1.33.0 // indirect

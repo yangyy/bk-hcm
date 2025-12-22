@@ -9,6 +9,7 @@ import RegionVpcSelector from '../../components/common/RegionVpcSelector';
 import SubnetSelector from '../../components/common/subnet-selector';
 import InputNumber from '@/components/input-number';
 import ConditionOptions from '../../components/common/condition-options/index.vue';
+import ConfigureList from '../../components/common/configuration-list/index.vue';
 import CommonCard from '@/components/CommonCard';
 import VpcReviewPopover from '../../components/common/VpcReviewPopover';
 import SelectedItemPreviewComp from '@/components/SelectedItemPreviewComp';
@@ -35,6 +36,10 @@ import useFilterResource from './useFilterResource';
 import { CLB_QUOTA_NAME } from '@/typings';
 import { useBusinessStore, useResourceStore } from '@/store';
 import { useWhereAmI } from '@/hooks/useWhereAmI';
+import RegionSelector from '../../components/common/region-selector.vue';
+import { cloneDeep } from 'lodash';
+import CalcPrice from '../children/calc-price';
+import cssModule from '../index.module.scss';
 
 const { Option } = Select;
 const { FormItem } = Form;
@@ -46,8 +51,19 @@ export default (formModel: Reactive<ApplyClbModel>) => {
   const { isBusinessPage } = useWhereAmI();
   const resourceStore = useResourceStore();
   const businessStore = useBusinessStore();
+  const originalFormModel = cloneDeep(formModel);
 
   // define data
+  const sideSliderOptions = ref<{
+    show: boolean;
+    type: 'add' | 'edit';
+    key: string;
+  }>({
+    show: false,
+    type: 'add',
+    key: '',
+  });
+  const configureList = reactive<ApplyClbModel[]>([]);
   const vpcId = ref('');
   const vpcData = ref(null); // 预览vpc
   const subnetData = ref(null); // 预览子网
@@ -58,6 +74,7 @@ export default (formModel: Reactive<ApplyClbModel>) => {
 
   // define handler function
   const handleVpcChange = async (vpc: any) => {
+    if (noResetParams.value) return;
     if (vpc) {
       // 获取 vpc 详情用于预览
       const detailApi = isBusinessPage ? businessStore.detail : resourceStore.detail;
@@ -121,16 +138,6 @@ export default (formModel: Reactive<ApplyClbModel>) => {
     currentLbQuota.value?.quota_limit ? quotaMax.value - formModel.require_count : 0,
   );
 
-  const rules = {
-    name: [
-      {
-        validator: (value: string) => /^[a-zA-Z0-9]([-a-zA-Z0-9]{0,58})[a-zA-Z0-9]$/.test(value),
-        message: '60个字符，字母、数字、“-”，且必须以字母、数字开头和结尾。',
-        trigger: 'change',
-      },
-    ],
-  };
-
   // change-handle - 更新 sla_type
   const handleSlaTypeChange = (v: '0' | '1') => {
     if (v === '0') formModel.sla_type = 'shared';
@@ -146,6 +153,21 @@ export default (formModel: Reactive<ApplyClbModel>) => {
       id: 'config',
       title: '配置信息',
       children: [
+        [
+          {
+            label: '云地域',
+            required: true,
+            property: 'region',
+            content: () => (
+              <RegionSelector
+                v-model={formModel.region}
+                type={ResourceTypeEnum.CLB}
+                vendor={formModel.vendor}
+                account-id={formModel.account_id}
+              />
+            ),
+          },
+        ],
         [
           {
             label: '网络类型',
@@ -194,7 +216,7 @@ export default (formModel: Reactive<ApplyClbModel>) => {
           required: true,
           property: 'cloud_vpc_id',
           content: () => (
-            <div class='component-with-preview'>
+            <div class={cssModule.componentWithPreview}>
               <RegionVpcSelector
                 class='flex-1'
                 v-model={formModel.cloud_vpc_id}
@@ -213,7 +235,7 @@ export default (formModel: Reactive<ApplyClbModel>) => {
             '单可用区：仅支持一个可用区。\n主备可用区：主可用区是当前承载流量的可用区。备可用区默认不承载流量，主可用区不可用时才使用备可用区。',
           hidden: !isIntranet.value && formModel.address_ip_version !== 'IPV4',
           content: () => (
-            <div class='flex-row'>
+            <div class={cssModule.flexRow}>
               {!isIntranet.value && (
                 <Select v-model={formModel.zoneType} clearable={false} filterable={false} class='w220'>
                   {ZONE_TYPE.map(({ label, value, isDisabled }) => {
@@ -285,7 +307,7 @@ export default (formModel: Reactive<ApplyClbModel>) => {
           property: 'cloud_subnet_id',
           hidden: !isIntranet.value && formModel.address_ip_version !== 'IPv6FullChain',
           content: () => (
-            <div class='component-with-preview'>
+            <div class={cssModule.componentWithPreview}>
               <SubnetSelector
                 class='flex-1'
                 v-model={formModel.cloud_subnet_id}
@@ -301,7 +323,7 @@ export default (formModel: Reactive<ApplyClbModel>) => {
                 handleChange={handleSubnetDataChange}
               />
               <Button
-                class='preview-btn'
+                class={cssModule.previewBtn}
                 text
                 theme='primary'
                 disabled={!formModel.cloud_subnet_id}
@@ -441,11 +463,12 @@ export default (formModel: Reactive<ApplyClbModel>) => {
           label: '实例计费模式',
           simpleShow: true,
           content: () => (
-            <div class='simple-show-container'>
-              <span class='label'>{t('实例计费模式')}</span>:<span class='value'>{t('按量计费')}</span>
+            <div class={cssModule.simpleShowContainer}>
+              <span class={cssModule.label}>{t('实例计费模式')}</span>:
+              <span class={cssModule.value}>{t('按量计费')}</span>
               <i
                 v-bk-tooltips={{ content: t('本期只支持按量计费'), placement: 'right' }}
-                class='hcm-icon bkhcm-icon-prompt'></i>
+                class={[cssModule['hcm-icon'], cssModule['bkhcm-icon-prompt']]}></i>
             </div>
           ),
         },
@@ -499,7 +522,7 @@ export default (formModel: Reactive<ApplyClbModel>) => {
           property: 'internet_max_bandwidth_out',
           hidden: !isIntranet.value && formModel.account_type === 'LEGACY',
           content: () => (
-            <div class='slider-wrap'>
+            <div class={cssModule.sliderWrap}>
               <Slider
                 v-model={formModel.internet_max_bandwidth_out}
                 minValue={internetMaxBandwidthOutConfig.value.min}
@@ -508,7 +531,7 @@ export default (formModel: Reactive<ApplyClbModel>) => {
                 showInput
                 labelClick>
                 {{
-                  end: () => <div class='slider-unit-suffix'>Mbps</div>,
+                  end: () => <div class={cssModule.sliderUnitSuffix}>Mbps</div>,
                 }}
               </Slider>
             </div>
@@ -557,12 +580,75 @@ export default (formModel: Reactive<ApplyClbModel>) => {
     },
   ]);
 
+  const resetFormModel = (data: ApplyClbModel) => {
+    noResetParams.value = true;
+    Object.entries(data).forEach(([key, value]) => {
+      if (!['vendor', 'account_id', 'account_type'].includes(key)) {
+        formModel[key] = value;
+      }
+    });
+  };
+  const closeSideslider = () => {
+    sideSliderOptions.value = {
+      type: 'add',
+      show: false,
+      key: '',
+    };
+  };
+  const handleConfirm = async () => {
+    await formRef.value.validate();
+    if (sideSliderOptions.value.type === 'add') {
+      configureList.push({ ...formModel, rowKey: new Date().getTime() });
+    } else {
+      const index = configureList.findIndex((item) => item.rowKey === sideSliderOptions.value.key);
+      if (index > -1) {
+        configureList[index] = {
+          ...configureList[index],
+          ...formModel,
+        };
+      }
+    }
+    closeSideslider();
+  };
+  const handleClone = (data: ApplyClbModel) => {
+    configureList.push({ ...data, rowKey: new Date().getTime() });
+  };
+  const handleEdit = (key: string) => {
+    const data = configureList.filter((item) => item.rowKey === key);
+    if (!data.length) return;
+    resetParams();
+    resetFormModel(data[0]);
+    nextTick(() => {
+      sideSliderOptions.value = {
+        type: 'edit',
+        show: true,
+        key,
+      };
+    });
+  };
+  const handleRemove = (key: string) => {
+    const index = configureList.findIndex((item) => item.rowKey === key);
+    if (index > -1) {
+      configureList.splice(index, 1);
+    }
+  };
+  const handleClose = () => {
+    resetFormModel(originalFormModel);
+    closeSideslider();
+  };
+  const handleShowSideSlider = () => {
+    sideSliderOptions.value = {
+      type: 'add',
+      show: true,
+      key: '',
+    };
+  };
   // define component
   const ApplyClbForm = defineComponent({
     setup() {
       return () => (
         <>
-          <Form class='apply-clb-form-container' formType='vertical' model={formModel} ref={formRef} rules={rules}>
+          <Form class='apply-clb-form-container' formType='vertical' model={formModel}>
             <ConditionOptions
               type={ResourceTypeEnum.CLB}
               bizs={formModel.bk_biz_id}
@@ -570,51 +656,87 @@ export default (formModel: Reactive<ApplyClbModel>) => {
               v-model:vendor={formModel.vendor}
               v-model:region={formModel.region}
             />
-            {formItemOptions.value.map(({ id, title, children }) => (
-              <CommonCard key={id} title={() => t(title)} class='form-card-container'>
-                {children.map((item) => {
-                  let contentVNode = null;
-                  if (Array.isArray(item)) {
-                    contentVNode = (
-                      <div class='flex-row'>
-                        {item.map(({ label, required, property, content, description, hidden }) => {
-                          if (hidden) return null;
-                          return (
-                            <FormItem
-                              key={property}
-                              label={t(label)}
-                              required={required}
-                              property={property}
-                              description={description}>
-                              {content()}
-                            </FormItem>
-                          );
-                        })}
-                      </div>
-                    );
-                  } else if (item.simpleShow) {
-                    contentVNode = item.content();
-                  } else {
-                    if (item.hidden) {
-                      contentVNode = null;
-                    } else {
-                      contentVNode = (
-                        <FormItem
-                          key={item.property}
-                          label={item.label}
-                          required={item.required}
-                          property={item.property}
-                          description={item.description}>
-                          {item.content()}
-                        </FormItem>
-                      );
-                    }
-                  }
-                  return contentVNode;
-                })}
-              </CommonCard>
-            ))}
+            <CommonCard
+              key={'configure-list'}
+              title={() => '配置清单'}
+              class='form-card-container configure-card-container'>
+              <ConfigureList
+                list={configureList}
+                vendor={formModel.vendor}
+                onShowConfigureSlider={handleShowSideSlider}
+                onCloneData={handleClone}
+                onEditData={handleEdit}
+                onRemoveData={handleRemove}
+              />
+            </CommonCard>
           </Form>
+          <bk-sideslider
+            v-model:isShow={sideSliderOptions.value.show}
+            title={'添加负载均衡'}
+            width='850'
+            class={cssModule.addClbConfigureSideslider}>
+            {{
+              default: () => (
+                <bk-form class={cssModule.applyClbFormContainer} formType='vertical' model={formModel} ref={formRef}>
+                  {formItemOptions.value.map(({ id, title, children }) => (
+                    <CommonCard key={id} title={() => t(title)} class={cssModule.formCardContainer}>
+                      {children.map((item) => {
+                        let contentVNode = null;
+                        if (Array.isArray(item)) {
+                          contentVNode = (
+                            <div class={cssModule.flexRow}>
+                              {item.map(({ label, required, property, content, description, hidden }) => {
+                                if (hidden) return null;
+                                return (
+                                  <FormItem
+                                    key={property}
+                                    label={t(label)}
+                                    required={required}
+                                    property={property}
+                                    description={description}>
+                                    {content()}
+                                  </FormItem>
+                                );
+                              })}
+                            </div>
+                          );
+                        } else if (item.simpleShow) {
+                          contentVNode = item.content();
+                        } else {
+                          if (item.hidden) {
+                            contentVNode = null;
+                          } else {
+                            contentVNode = (
+                              <FormItem
+                                key={item.property}
+                                label={item.label}
+                                required={item.required}
+                                property={item.property}
+                                description={item.description}>
+                                {item.content()}
+                              </FormItem>
+                            );
+                          }
+                        }
+                        return contentVNode;
+                      })}
+                    </CommonCard>
+                  ))}
+                </bk-form>
+              ),
+              footer: (
+                <>
+                  <div>
+                    <Button theme='primary' onClick={handleConfirm} class={'mr10'}>
+                      {t('保存')}
+                    </Button>
+                    <Button onClick={handleClose}>{t('取消')}</Button>
+                  </div>
+                  <CalcPrice formModel={formModel} formRef={formRef.value} />
+                </>
+              ),
+            }}
+          </bk-sideslider>
           {/* 负载均衡规格类型选择弹框 */}
           {!lbSpecTypeDialogState.isHidden && (
             <LbSpecTypeDialog
@@ -632,8 +754,17 @@ export default (formModel: Reactive<ApplyClbModel>) => {
 
   // 重置参数
   const resetParams = (
-    keys: string[] = ['zones', 'backup_zones', 'cloud_vpc_id', 'cloud_subnet_id', 'vip_isp', 'cloud_eip_id'],
+    keys: string[] = [
+      'zones',
+      'backup_zones',
+      'cloud_vpc_id',
+      'cloud_subnet_id',
+      'vip_isp',
+      'cloud_eip_id',
+      'internet_max_bandwidth_out',
+    ],
   ) => {
+    if (noResetParams.value) return;
     keys.forEach((key) => {
       switch (typeof formModel[key]) {
         case 'number':
@@ -657,6 +788,13 @@ export default (formModel: Reactive<ApplyClbModel>) => {
     });
   };
 
+  watch(
+    () => sideSliderOptions.value.show,
+    () => {
+      nextTick(() => (noResetParams.value = false));
+    },
+  );
+
   watch([() => formModel.account_id, () => formModel.vendor], ([accountId, vendor]) => {
     // 当云账号变更时, 查询用户网络类型
     if (!accountId || !vendor) {
@@ -669,6 +807,7 @@ export default (formModel: Reactive<ApplyClbModel>) => {
 
   watch([() => formModel.account_id, () => formModel.region], () => {
     // 当 account_id 或 region 改变时, 恢复默认状态
+    if (noResetParams.value) return;
     resetParams();
     Object.assign(formModel, {
       address_ip_version: 'IPV4',
@@ -682,6 +821,7 @@ export default (formModel: Reactive<ApplyClbModel>) => {
   watch(
     () => formModel.load_balancer_type,
     (val) => {
+      if (noResetParams.value) return;
       // 重置通用参数
       resetParams();
       if (val === 'INTERNAL') {
@@ -729,7 +869,7 @@ export default (formModel: Reactive<ApplyClbModel>) => {
   );
 
   // 这个需要放到watch之后，避免数据清空之前就触发了effect
-  const { ispList, isResourceListLoading, quotas, currentResourceListMap, specAvailabilitySet } =
+  const { ispList, isResourceListLoading, quotas, currentResourceListMap, specAvailabilitySet, noResetParams } =
     useFilterResource(formModel);
 
   return {
@@ -738,5 +878,6 @@ export default (formModel: Reactive<ApplyClbModel>) => {
     isSubnetPreviewDialogShow,
     ApplyClbForm,
     formRef,
+    configureList,
   };
 };

@@ -12,6 +12,7 @@ import useBillStore from '@/store/useBillStore';
 import successIcon from '@/assets/image/corret-fill.png';
 import failedIcon from '@/assets/image/delete-fill.png';
 import { BkRadioButton, BkRadioGroup } from 'bkui-vue/lib/radio';
+import isEmail from 'validator/lib/isEmail';
 import {
   ValidateStatus,
   useSecretExtension,
@@ -89,8 +90,7 @@ export default defineComponent({
                       class={`account-vendor-option ${
                         vendor === formModel.vendor ? 'account-vendor-option-active' : ''
                       }`}
-                      onClick={() => (formModel.vendor = vendor)}
-                    >
+                      onClick={() => (formModel.vendor = vendor)}>
                       <img src={icon} alt={name} class={'account-vendor-option-icon'} />
                       <p class={'account-vendor-option-text'}>{name}</p>
                       {formModel.vendor === vendor ? <Success fill='#3A84FF' class={'active-icon'} /> : null}
@@ -125,8 +125,14 @@ export default defineComponent({
                     },
                   },
                 ],
-              }}
-            >
+                email: [
+                  {
+                    trigger: 'change',
+                    message: '请输入正确格式的邮箱',
+                    validator: (val: string) => isEmail(`${val}@tencent.com`),
+                  },
+                ],
+              }}>
               <FormItem label='帐号名称' required property='name'>
                 <Input v-model={formModel.name} placeholder='请输入账号名称'></Input>
               </FormItem>
@@ -156,8 +162,7 @@ export default defineComponent({
               <p class={'header-text'}>同一个主账号下,只允许接入一次。如后续对API密钥更新,必须是隶属于同一主账号。</p>
             </div>
           )}
-          class={'info-card'}
-        >
+          class={'info-card'}>
           <>
             <div class={'account-form-card-content'}>
               <Form formType='vertical' class={'account-form-card-content-grid'}>
@@ -208,8 +213,7 @@ export default defineComponent({
                   class={'account-validate-btn'}
                   onClick={() => handleValidate()}
                   disabled={isValidateDiasbled.value}
-                  loading={isValidateLoading.value}
-                >
+                  loading={isValidateLoading.value}>
                   账号校验
                 </Button>
                 {curExtension.value.validatedStatus === ValidateStatus.YES ? (
@@ -239,16 +243,14 @@ export default defineComponent({
           }}
           onClick={() => {
             handleSubmit();
-          }}
-        >
+          }}>
           提交
         </Button>
         <Button
           class='mw88'
           onClick={() => {
             router.back();
-          }}
-        >
+          }}>
           取消
         </Button>
       </div>

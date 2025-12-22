@@ -455,7 +455,7 @@ type ListListenerWithTargetsReq struct {
 	BkBizID           int64               `json:"bk_biz_id" validate:"omitempty"`
 	Vendor            enumor.Vendor       `json:"vendor" validate:"required,min=1"`
 	AccountID         string              `json:"account_id" validate:"required,min=1"`
-	ListenerQueryList []ListenerQueryItem `json:"rule_query_list" validate:"required,min=1,max=20"`
+	ListenerQueryList []ListenerQueryItem `json:"rule_query_list" validate:"required,min=1"`
 	NewRsWeight       *int64              `json:"new_rs_weight" validate:"omitempty"`
 }
 
@@ -502,10 +502,6 @@ func (req *ListenerQueryItem) Validate() error {
 	}
 	if len(req.ClbVipDomains) != len(req.CloudLbIDs) {
 		return errors.New("clb_vip_domains and cloud_lb_ids num must be equal")
-	}
-	// 传入的负载均衡ID数量不能超过50个
-	if len(req.CloudLbIDs) > 50 {
-		return errors.New("cloud_lb_ids num must be less than 50")
 	}
 	// RSPORT填写多个的话，必须和RSIP数量一致
 	if len(req.RsPorts) > 0 && len(req.RsPorts) != len(req.RsIPs) {
@@ -618,8 +614,9 @@ func (req *ListenerDeleteReq) Validate() error {
 	if len(req.ClbVipDomains) != len(req.CloudLbIDs) {
 		return errors.New("clb_vip_domains and cloud_lb_ids num must be equal")
 	}
-	if len(req.CloudLbIDs) > 50 {
-		return errors.New("cloud_lb_ids num must be less than 50")
+	// 和平等业务的CLB较多，上限暂定为3000
+	if len(req.CloudLbIDs) > 3000 {
+		return errors.New("cloud_lb_ids num must be less than 3000")
 	}
 	if len(req.Ports) == 0 {
 		return fmt.Errorf("ports不能为空")
@@ -645,7 +642,7 @@ type ListListenerByCondReq struct {
 	BkBizID           int64               `json:"bk_biz_id" validate:"omitempty"`
 	Vendor            enumor.Vendor       `json:"vendor" validate:"required,min=1"`
 	AccountID         string              `json:"account_id" validate:"required,min=1"`
-	ListenerQueryList []ListenerQueryLine `json:"rule_query_list" validate:"required,min=1,max=50"`
+	ListenerQueryList []ListenerQueryLine `json:"rule_query_list" validate:"required,min=1"`
 }
 
 // Validate request.
@@ -658,10 +655,18 @@ func (req *ListListenerByCondReq) Validate() error {
 		return errors.New("rule_query_list is empty")
 	}
 
+	totalCLBIDs := 0
+	totalCLBVipDomains := 0
 	for _, item := range req.ListenerQueryList {
 		if err := item.Validate(); err != nil {
 			return err
 		}
+		totalCLBIDs += len(item.CloudLbIDs)
+		totalCLBVipDomains += len(item.ClbVipDomains)
+	}
+	// 和平等业务的CLB较多，上限暂定为3000
+	if totalCLBIDs > 3000 || totalCLBVipDomains > 3000 {
+		return errors.New("cloud_lb_ids and clb_vip_domains num must be less than 3000")
 	}
 
 	return validator.Validate.Struct(req)
@@ -671,8 +676,8 @@ func (req *ListListenerByCondReq) Validate() error {
 type ListenerQueryLine struct {
 	Protocol      enumor.ProtocolType `json:"protocol" validate:"required,min=1"`
 	Region        string              `json:"region" validate:"required,min=1"`
-	ClbVipDomains []string            `json:"clb_vip_domains" validate:"required,min=1,max=50"`
-	CloudLbIDs    []string            `json:"cloud_lb_ids" validate:"required,min=1,max=50"`
+	ClbVipDomains []string            `json:"clb_vip_domains" validate:"required,min=1,max=3000"`
+	CloudLbIDs    []string            `json:"cloud_lb_ids" validate:"required,min=1,max=3000"`
 	Ports         []int64             `json:"ports" validate:"omitempty,max=500"`
 	RsIPs         []string            `json:"rs_ips" validate:"omitempty,max=500"`
 	RsPorts       []int64             `json:"rs_ports" validate:"omitempty,max=500"`
@@ -686,11 +691,6 @@ func (req *ListenerQueryLine) Validate() error {
 
 	if len(req.ClbVipDomains) != len(req.CloudLbIDs) {
 		return errors.New("clb_vip_domains and cloud_lb_ids num must be equal")
-	}
-
-	// 传入的负载均衡ID数量不能超过50个
-	if len(req.CloudLbIDs) > 50 {
-		return errors.New("cloud_lb_ids num must be less than 50")
 	}
 
 	// 传入的RSIP数量不能超过500个
@@ -717,4 +717,12 @@ type ListListenerQueryReq struct {
 	Vendor            enumor.Vendor     `json:"vendor" validate:"required,min=1"`
 	AccountID         string            `json:"account_id" validate:"required,min=1"`
 	ListenerQueryItem ListenerQueryItem `json:"rule_query_item" validate:"required"`
+}
+
+// ListLoadBalancerIDsResult define list load balancer ids result.
+type ListLoadBalancerIDsResult struct {
+	CloudClbIDsV1 []string `json:"cloud_clb_ids_v1"`
+	ClbIDsV1      []string `json:"clb_ids_v1"`
+	CloudClbIDsV2 []string `json:"cloud_clb_ids_v2"`
+	ClbIDsV2      []string `json:"clb_ids_v2"`
 }

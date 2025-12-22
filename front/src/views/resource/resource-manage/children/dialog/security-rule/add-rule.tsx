@@ -70,15 +70,18 @@ export default defineComponent({
     const steps = [
       {
         component: () => (
-          <AddRuleTable
-            ref={instance}
-            vendor={props.vendor as VendorEnum}
-            templateData={props.templateData}
-            relatedSecurityGroups={props.relatedSecurityGroups}
-            id={props.id}
-            activeType={props.activeType}
-            isEdit={props.isEdit}
-          />
+          <div style={{ maxHeight: 'calc(100vh - 300px)', overflowY: 'auto' }}>
+            <AddRuleTable
+              style={{ marginBottom: 0 }}
+              ref={instance}
+              vendor={props.vendor as VendorEnum}
+              templateData={props.templateData}
+              relatedSecurityGroups={props.relatedSecurityGroups}
+              id={props.id}
+              activeType={props.activeType}
+              isEdit={props.isEdit}
+            />
+          </div>
         ),
       },
     ];
@@ -117,8 +120,7 @@ export default defineComponent({
           isShow={this.isShow}
           steps={this.steps}
           onConfirm={this.handleConfirm}
-          onCancel={this.handleClose}
-        ></step-dialog>
+          onCancel={this.handleClose}></step-dialog>
       </>
     );
   },

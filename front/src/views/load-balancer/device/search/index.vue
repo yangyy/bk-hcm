@@ -41,18 +41,22 @@ const disabled = computed(() => (!hasSaved.value && !hasChange.value) || !hasAny
 
 const handleAccountChange = (item: IAccountItem) => {
   formModel.vendor = item?.vendor;
-  formModel.lb_regions = [];
+  if (formModel.lb_regions?.length) {
+    formModel.lb_regions = [];
+  }
 };
 const handlePaste = (value: any) => value.split(/,|;|\n|\s/).map((tag: any) => ({ id: tag, name: tag }));
 const handleSave = async () => {
   await formRef.value.validate();
-  Object.keys(formModel).forEach((key) => {
-    originFormModel[key] = formModel[key];
-  });
-  hasSaved.value = true;
-  isShow.value = false;
-  emit('count-change', false);
-  emit('save', cloneDeep(originFormModel));
+  setTimeout(() => {
+    Object.keys(formModel).forEach((key) => {
+      originFormModel[key] = formModel[key];
+    });
+    hasSaved.value = true;
+    isShow.value = false;
+    emit('count-change', false);
+    emit('save', cloneDeep(originFormModel));
+  }, 300);
 };
 const handleReset = () => {
   Object.keys(formModel).forEach((key) => {
@@ -93,7 +97,7 @@ watch(
   },
 );
 
-const conditionField: ModelPropertySearch[] = [
+const conditionField = computed<ModelPropertySearch[]>(() => [
   {
     id: 'account_id',
     type: 'account',
@@ -228,7 +232,7 @@ const conditionField: ModelPropertySearch[] = [
       pasteFn: handlePaste,
     },
   },
-];
+]);
 </script>
 
 <template>
@@ -241,7 +245,7 @@ const conditionField: ModelPropertySearch[] = [
           :property="field.id"
           v-for="field in conditionField"
           :key="field.id"
-          :required="field.id === 'account_id'"
+          :required="field.id === 'account_id' || field.id === 'lb_regions'"
         >
           <component :is="`hcm-search-${field.type}`" v-bind="field.props" v-model="formModel[field.id]" />
         </bk-form-item>
