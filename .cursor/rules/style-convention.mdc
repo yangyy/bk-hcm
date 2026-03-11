@@ -1,0 +1,11 @@
+---
+description: Vue 组件样式规范
+globs: ["**/*.vue"]
+alwaysApply: false
+---
+
+# Vue 组件样式规范
+
+- 禁止在 Vue 组件中使用独立的 `.scss` / `.css` 样式文件
+- 所有组件样式统一使用 `<style scoped lang="scss">` 写在 `.vue` 文件内
+- 旧的独立样式文件方式（如 `index.scss`、`style.scss`）已废弃，新代码不应再使用

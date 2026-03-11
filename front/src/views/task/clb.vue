@@ -13,8 +13,9 @@ import { SearchClbView } from '@/model/task/search.view';
 import { getModel } from '@/model/manager';
 import { transformSimpleCondition, getDateRange } from '@/utils/search';
 import { MENU_BUSINESS_TASK_MANAGEMENT_DETAILS } from '@/constants/menu-symbol';
+import type { ModelPropertySearch } from '@/model/typings';
 
-import Search from './children/search/search.vue';
+import AdvancedSearch from '@/components/advanced-search/index.vue';
 import DataList from './children/data-list/data-list.vue';
 
 const route = useRoute();
@@ -22,9 +23,47 @@ const userStore = useUserStore();
 const taskStore = useTaskStore();
 const { getBizsId } = useWhereAmI();
 
-const properties = getModel(SearchClbView).getProperties();
+const allProperties = getModel(SearchClbView).getProperties();
+const modelFields = allProperties.filter((p) => !p.apiOnly && p.id !== 'resource');
 
-const searchQs = useSearchQs({ key: 'filter', properties });
+const extraFields: ModelPropertySearch[] = [
+  { id: 'clb_name', name: 'CLB名称', type: 'string' },
+  { id: 'clb_vip', name: 'VIP地址', type: 'string' },
+  { id: 'listener_num', name: '监听器数量', type: 'number' },
+  {
+    id: 'clb_type',
+    name: 'CLB类型',
+    type: 'enum',
+    option: { OPEN: '公网', INTERNAL: '内网' },
+  },
+  { id: 'region', name: '地域', type: 'string' },
+  { id: 'vpc_id', name: 'VPC', type: 'string' },
+  { id: 'subnet_id', name: '子网', type: 'string' },
+  {
+    id: 'status',
+    name: '运行状态',
+    type: 'enum',
+    option: { running: '运行中', stopped: '已停止', creating: '创建中' },
+  },
+  { id: 'domain', name: '域名', type: 'string' },
+  { id: 'expire_time', name: '到期时间', type: 'datetime' },
+  { id: 'charge_type', name: '计费模式', type: 'string' },
+  { id: 'bandwidth', name: '带宽(Mbps)', type: 'number' },
+  { id: 'remark', name: '备注', type: 'string' },
+];
+
+const allFields = [...modelFields, ...extraFields];
+const defaultFieldIds = [
+  ...modelFields.map((p) => p.id),
+  'clb_name',
+  'clb_vip',
+  'clb_type',
+  'region',
+  'vpc_id',
+  'status',
+];
+
+const searchQs = useSearchQs({ key: 'filter', properties: allProperties });
 const { pagination, getPageParams } = usePage();
 
 const taskList = ref<ITaskItem[]>([]);
@@ -79,7 +118,7 @@ watch(
 
     const { list, count } = await taskStore.getTaskList({
       bk_biz_id: getBizsId(),
-      filter: transformSimpleCondition(condition.value, properties),
+      filter: transformSimpleCondition(condition.value, allProperties),
       page: getPageParams(pagination, { sort, order }),
     });
 
@@ -126,7 +165,16 @@ onMounted(() => {
 </script>
 
 <template>
-  <search :resource="ResourceTypeEnum.CLB" :condition="condition" @search="handleSearch" @reset="handleReset" />
+  <advanced-search
+    :fields="allFields"
+    :default-field-ids="defaultFieldIds"
+    :condition="condition"
+    :columns-per-row="5"
+    :collapsed-rows="2"
+    favorites-key="task-clb"
+    @search="handleSearch"
+    @reset="handleReset"
+  />
   <data-list
     v-bkloading="{ loading: taskStore.taskListLoading }"
     :resource="ResourceTypeEnum.CLB"

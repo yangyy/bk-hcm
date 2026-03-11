@@ -1,0 +1,36 @@
+---
+description: Vue <script setup> 编码规范
+globs: ["**/*.vue"]
+alwaysApply: false
+---
+
+# Vue `<script setup>` 编码规范
+
+## 模板 ref 使用 `useTemplateRef`
+
+- 使用 `useTemplateRef` 替代 `ref()` 来获取模板引用
+- 参数字符串必须与模板中的 `ref` 属性值一致
+
+```vue
+// Bad
+const gridRef = ref<InstanceType<typeof SearchGrid>>();
+
+// Good
+const gridRef = useTemplateRef<InstanceType<typeof SearchGrid>>('gridRef');
+```
+
+## 避免变量名与组件导入名产生 kebab-case 冲突
+
+- 在 `<script setup>` 中，PascalCase 组件导入与 camelCase 变量在 kebab-case 下可能映射到同一个名字，导致 ESLint 误报组件 "defined but never used"
+- 例如：`ActiveTags`（组件）和 `activeTags`（变量）都会映射为 `active-tags`，ESLint 会把 `<active-tags>` 关联到变量而非组件
+- 命名变量时需避开与组件导入名的 kebab-case 冲突，可使用 `activeTagList`、`activeTagData` 等替代名
+
+```vue
+// Bad — activeTags 与 ActiveTags 在 kebab-case 下冲突
+import ActiveTags from './active-tags.vue';
+const activeTags = computed(() => []);
+
+// Good — 重命名变量避免冲突
+import ActiveTags from './active-tags.vue';
+const activeTagList = computed(() => []);
+```
