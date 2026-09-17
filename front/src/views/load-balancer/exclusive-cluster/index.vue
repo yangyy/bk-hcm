@@ -137,10 +137,10 @@ watch(
       </div>
     </div>
     <DataList
+      v-bkloading="{ loading: exclusiveClusterStore.exclusiveClusterListLoading }"
       :columns="columns"
       :list="listData"
       :pagination="pagination"
-      :loading="exclusiveClusterStore.exclusiveClusterListLoading"
       @assign="handleAssign"
       @selection-change="handleSelectionChange"
       @page-change="handlePageChange"
@@ -167,13 +167,6 @@ watch(
     .search-selector-container {
       margin-left: auto;
     }
-  }
-
-  :deep(.bk-nested-loading),
-  :deep(.bk-table) {
-    height: 100%;
-    max-height: 100% !important;
-    margin-top: 0 !important;
   }
 }
 </style>

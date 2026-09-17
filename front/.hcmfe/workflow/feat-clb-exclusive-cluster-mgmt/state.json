@@ -3,7 +3,7 @@
   "title": "CLB exclusive cluster management list",
   "currentStage": "test",
   "createdAt": "2026-09-14T10:25:58.830Z",
-  "updatedAt": "2026-09-17T04:01:19.865Z",
+  "updatedAt": "2026-09-17T09:20:16.040Z",
   "artifacts": {
     "prd": [
       {
@@ -149,11 +149,18 @@
         "clb.ts",
         "listener.ts",
         "api.ts",
-        "constants.ts"
+        "constants.ts",
+        ".vue",
+        "src/style/override/bkpopover.scss",
+        "views/task/clb.vue",
+        "permission-template/index.vue",
+        "load-balancer/clb/load-balancer-table.vue",
+        "data-list.vue",
+        "index.vue"
       ],
-      "contentFingerprint": "0dec343bd318699843f87eb9c5cba79825054fd5",
-      "codeBaseline": "25941adf876ca57318d85c79e58d99134642bb62",
-      "seatedAt": "2026-09-17T04:01:19.864Z"
+      "contentFingerprint": "fd031debd3abf2cb037f8c091f702671751273a7",
+      "codeBaseline": "35649d328f0be27bd324f8e7d91fca3c0e20ab27",
+      "seatedAt": "2026-09-17T09:20:16.040Z"
     }
   }
 }

@@ -12,12 +12,9 @@ export interface IDataListProps {
   columns: ModelPropertyColumn[];
   list: IExclusiveClusterItem[];
   pagination: PaginationType;
-  loading?: boolean;
 }
 
-const props = withDefaults(defineProps<IDataListProps>(), {
-  loading: false,
-});
+const props = defineProps<IDataListProps>();
 
 const emit = defineEmits<{
   assign: [row: IExclusiveClusterItem];
@@ -63,58 +60,61 @@ watch(
 </script>
 
 <template>
-  <bk-loading :loading="loading">
-    <bk-table
-      ref="tableRef"
-      row-hover="auto"
-      :data="list"
-      :pagination="pagination"
-      max-height="100%"
-      :settings="settings"
-      :is-row-select-enable="isRowSelectEnable"
-      remote-pagination
-      show-overflow-tooltip
-      @page-limit-change="(limit: number) => emit('page-size-change', limit)"
-      @page-value-change="(page: number) => emit('page-change', page)"
-      @column-sort="(sortType: SortType) => emit('column-sort', sortType)"
-      @selection-change="(selection: any) => handleSelectionChange(selection, isCurRowSelectEnable)"
-      @select-all="(selection: any) => handleSelectionChange(selection, isCurRowSelectEnable, true)"
-      row-key="id"
+  <bk-table
+    ref="tableRef"
+    row-hover="auto"
+    :data="list"
+    :pagination="pagination"
+    :settings="settings"
+    :is-row-select-enable="isRowSelectEnable"
+    remote-pagination
+    show-overflow-tooltip
+    @page-limit-change="(limit: number) => emit('page-size-change', limit)"
+    @page-value-change="(page: number) => emit('page-change', page)"
+    @column-sort="(sortType: SortType) => emit('column-sort', sortType)"
+    @selection-change="(selection: any) => handleSelectionChange(selection, isCurRowSelectEnable)"
+    @select-all="(selection: any) => handleSelectionChange(selection, isCurRowSelectEnable, true)"
+    row-key="id"
+  >
+    <bk-table-column type="selection" :width="40" :min-width="40" />
+    <bk-table-column
+      v-for="(column, index) in columns"
+      :key="index"
+      :prop="column.id"
+      :label="column.name"
+      :sort="column.sort"
+      :width="column.width"
+      :fixed="column.fixed"
+      :show-overflow-tooltip="column.id !== 'assign_status'"
     >
-      <bk-table-column type="selection" :width="40" :min-width="40" />
-      <bk-table-column
-        v-for="(column, index) in columns"
-        :key="index"
-        :prop="column.id"
-        :label="column.name"
-        :sort="column.sort"
-        :width="column.width"
-        :fixed="column.fixed"
-        :show-overflow-tooltip="column.id !== 'assign_status'"
-      >
-        <template #default="{ row }">
-          <template v-if="column.id === 'assign_status'">
-            <bk-tag
-              v-bk-tooltips="{
-                content: businessGlobalStore.businessFullList.find((item) => item.id === row.bk_biz_id)?.name,
-                disabled: !row.bk_biz_id || row.bk_biz_id === UNASSIGNED_BIZ_ID,
-                theme: 'light',
-              }"
-              :theme="row.bk_biz_id === UNASSIGNED_BIZ_ID ? false : 'success'"
-            >
+      <template #default="{ row }">
+        <template v-if="column.id === 'assign_status'">
+          <!-- 悬浮提示一律用 bk-popover，不要换成 v-bk-tooltips：列插槽会被表格的隐藏 GhostBody
+               在挂载时渲染一次，该指令的 beforeMount 会同步排干 post-flush 队列，令滚动条在表体
+               尚未插入 DOM 时初始化，横向滚动条会被永久钉在表头下方 -->
+          <bk-popover
+            placement="top"
+            arrow
+            ext-cls="hcm-tooltips-popover"
+            :content="businessGlobalStore.businessFullList.find((item) => item.id === row.bk_biz_id)?.name"
+            :disabled="!row.bk_biz_id || row.bk_biz_id === UNASSIGNED_BIZ_ID"
+          >
+            <bk-tag :theme="row.bk_biz_id === UNASSIGNED_BIZ_ID ? false : 'success'">
               {{ row.bk_biz_id === UNASSIGNED_BIZ_ID ? '未分配' : '已分配' }}
             </bk-tag>
-          </template>
-          <display-value v-else :property="column" :value="row[column.id]" :display="column?.meta?.display" />
+          </bk-popover>
         </template>
-      </bk-table-column>
-      <bk-table-column :show-overflow-tooltip="false" label="操作" :width="100" fixed="right">
-        <template #default="{ row }">
-          <span v-bk-tooltips="{ content: '已分配', disabled: isUnassigned(row) }">
+        <display-value v-else :property="column" :value="row[column.id]" :display="column?.meta?.display" />
+      </template>
+    </bk-table-column>
+    <bk-table-column :show-overflow-tooltip="false" label="操作" :width="100" fixed="right">
+      <template #default="{ row }">
+        <bk-popover placement="top" arrow ext-cls="hcm-tooltips-popover" content="已分配" :disabled="isUnassigned(row)">
+          <span>
             <bk-button theme="primary" text :disabled="!isUnassigned(row)" @click="handleAssign(row)">分配</bk-button>
           </span>
-        </template>
-      </bk-table-column>
-    </bk-table>
-  </bk-loading>
+        </bk-popover>
+      </template>
+    </bk-table-column>
+  </bk-table>
 </template>
