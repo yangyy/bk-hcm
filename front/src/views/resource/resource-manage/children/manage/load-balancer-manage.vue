@@ -1,6 +1,7 @@
 <template>
   <Loading :loading="isLoading" :opacity="1">
     <section class="toolbar" :class="isResourcePage ? 'justify-content-end' : 'justify-content-between'">
+      <slot name="toolbar-prefix"></slot>
       <slot></slot>
       <BatchDistribution
         :selections="selections"
